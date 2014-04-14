@@ -71,16 +71,10 @@ def recursive_dict(f, root=None, name='root'):
             return np.array(f, dtype=dtype).squeeze()
         elif f.dtype.name in ['uint16']: # this may be a string for Matlab
             add_dtype_name(f, name)
-            try:
+            if  'MATLAB_int_decode' in f.attrs.keys(): # this key is only present if f is a string
                 return string(f)
-            except ValueError: # it wasn't...
-                print "WARNING:", name, ":"
-                print "\t", f
-                print "\t CONVERSION TO STRING FAILED, USING ARRAY!"
-                tmp = np.array(f).squeeze()
-                print "\t", tmp
-                return tmp
-            pass
+            else:
+                return np.array(f, dtype=np.uint16).squeeze() # otherwise it's a uint16
         elif f.dtype.name=='object': # this is a 2D array of HDF5 object references or just objects
             add_dtype_name(f, name)
             container = []
@@ -155,17 +149,10 @@ class Node(object):
                         raise MemoryError
                 return np.array(f, dtype=dtype).squeeze()
             elif f.dtype.name in ['uint16']: # this may be a string for Matlab
-                # print "STRING!"
-                try:
-                    return string(f)
-                except ValueError: # it wasn't...
-                    print "WARNING:", self.__name, ":"
-                    print "\t", f
-                    print "\t CONVERSION TO STRING FAILED, USING ARRAY!"
-                    tmp = np.array(f).squeeze()
-                    print "\t", tmp
-                    return tmp
-                pass
+	            if  'MATLAB_int_decode' in f.attrs.keys():
+	                return string(f)
+	            else:
+	                return np.array(f, dtype=np.uint16).squeeze()
             elif f.dtype.name=='object': # this is a 2D array of HDF5 object references or just objects
                 # print "OBJECT!"
                 container = []
